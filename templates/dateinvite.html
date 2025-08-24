@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Date Invite 💕</title>
+  <!-- Cute, cartoony, calm pastel page with fun interactions -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg-cream:#FFF7F0;
+      --bg-mint:#EAF9F5;
+      --bg-sky:#EEF6FF;
+      --ink:#3c3c3c;
+      --muted:#6f6f6f;
+      --pink:#ffb6cc;      /* soft pink */
+      --pink-2:#ffcfe0;    /* lighter */
+      --blue:#cfe5ff;      /* soft sky */
+      --lav:#e9e2ff;       /* lavender */
+      --mint:#d7f3ea;      /* mint */
+      --shadow: 0 10px 30px rgba(30,30,60,.15);
+      --radius: 22px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: 'Nunito', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(900px 500px at 10% 10%, var(--bg-sky) 0%, transparent 60%),
+        radial-gradient(800px 500px at 90% 20%, var(--bg-mint) 0%, transparent 55%),
+        radial-gradient(1000px 700px at 50% 100%, var(--bg-cream) 0%, transparent 60%),
+        linear-gradient(180deg, #fff, #fff);
+      overflow:hidden;
+    }
+
+    /* floating doodles */
+    .decor{position:fixed; inset:0; pointer-events:none; overflow:hidden;}
+    .dot{position:absolute; opacity:.5; filter:saturate(110%);} 
+    .dot.heart{width:18px;height:18px; background: radial-gradient(circle at 30% 30%, #ff9ec7 0 40%, transparent 43%), radial-gradient(circle at 70% 30%, #ff9ec7 0 40%, transparent 43%), linear-gradient(#ff9ec7 60%, transparent 0); transform: rotate(45deg);} 
+    .dot.star{width:16px;height:16px;background: conic-gradient(from 0deg, #ffd6e8 0 10%, transparent 10% 20%, #ffd6e8 20% 30%, transparent 30% 40%, #ffd6e8 40% 50%, transparent 50% 60%, #ffd6e8 60% 70%, transparent 70% 80%, #ffd6e8 80% 90%, transparent 90% 100%); clip-path: polygon(50% 0, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);} 
+    @keyframes floaty{ 0%{ transform:translateY(0) } 50%{ transform:translateY(-12px) } 100%{ transform:translateY(0) } }
+
+    .wrap{ min-height:100%; display:grid; place-items:center; padding:24px; }
+
+    .card{
+      width:min(92vw, 560px);
+      background:#FFFCF9;
+      border:1px solid #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:28px 22px 22px;
+      position:relative;
+      text-align:center;
+    }
+
+    .sticker-row{ display:flex; gap:8px; justify-content:center; margin-bottom:6px; opacity:.7 }
+    .sticker{ font-size:22px; animation: floaty 4s ease-in-out infinite; }
+    .sticker:nth-child(2){ animation-delay:.6s }
+    .sticker:nth-child(3){ animation-delay:1.2s }
+
+    h1{
+      font-family:'Quicksand', sans-serif;
+      font-weight:800;
+      font-size: clamp(1.6rem, 4vw, 2.2rem);
+      margin:8px 0 6px;
+    }
+    .lead{ color:var(--muted); margin:0 auto 14px; max-width:40ch; }
+
+    .btn-row{ display:flex; gap:10px; justify-content:center; align-items:center; margin-top:12px; position:relative; min-height:64px; }
+    .btn{
+      appearance:none; border:none; cursor:pointer; font-weight:800; letter-spacing:.3px; 
+      padding:12px 18px; border-radius:16px; transition: transform .15s ease, box-shadow .2s ease, background .2s ease; box-shadow: 0 6px 16px rgba(0,0,0,.08);
+    }
+    .btn.yes{ background: linear-gradient(120deg, var(--pink), var(--pink-2)); color:#3b2b2b; }
+    .btn.no{ background:#f1f1f6; color:#666; }
+    .btn:active{ transform: translateY(1px) scale(.98) }
+
+    .hint{ font-size:.92rem; color:var(--muted); margin-top:6px }
+
+    /* success state */
+    .success{ margin-top:8px; padding-top:12px; border-top:1px dashed #eee; }
+    .hidden{ display:none }
+    .success h2{ margin:6px 0 4px; font-family:'Quicksand',sans-serif; font-size:1.6rem }
+    .countdown{ color:#7a6a6a }
+
+    /* floating hearts on success */
+    .hearts{ position:absolute; inset:0; overflow:hidden; pointer-events:none; border-radius:inherit; }
+    .heart{ position:absolute; width:16px; height:16px; transform: rotate(45deg); background:#ff9ec7; opacity:.75; border-radius:3px; }
+    .heart:before, .heart:after{ content:""; position:absolute; width:16px; height:16px; background:#ff9ec7; border-radius:50%; }
+    .heart:before{ left:-8px; top:0 }
+    .heart:after{ top:-8px; left:0 }
+    @keyframes rise{ from{ transform:translateY(0) scale(1) rotate(45deg); opacity:.9 } to{ transform:translateY(-160%) scale(.8) rotate(45deg); opacity:0 } }
+
+    /* mobile tweak */
+    @media (max-width:480px){ .btn{ padding:12px 14px } }
+
+    /* reduce-motion support */
+    @media (prefers-reduced-motion: reduce){
+      .sticker, .dot, .heart{ animation: none !important }
+    }
+  </style>
+</head>
+<body>
+  <!-- background doodles -->
+  <div class="decor" aria-hidden="true">
+    <span class="dot heart" style="left:6%; top:18%; animation: floaty 5s ease-in-out infinite;"></span>
+    <span class="dot star"  style="left:84%; top:22%; animation: floaty 6s ease-in-out infinite .6s;"></span>
+    <span class="dot heart" style="left:78%; top:78%; animation: floaty 5.6s ease-in-out infinite 1.2s;"></span>
+    <span class="dot star"  style="left:14%; top:72%; animation: floaty 6.4s ease-in-out infinite .9s;"></span>
+  </div>
+
+  <main class="wrap">
+    <section class="card" role="dialog" aria-labelledby="title">
+      <div class="sticker-row" aria-hidden="true">
+        <span class="sticker">🍰</span>
+        <span class="sticker">🌸</span>
+        <span class="sticker">⭐️</span>
+      </div>
+
+      <h1 id="title">Wanna go on a date with me?</h1>
+      <p class="lead">I’ll bring the laughs and dessert. You bring your smile. Deal? 😊</p>
+
+      <div class="btn-row" id="btnRow">
+        <button id="yesBtn" class="btn yes">Yes! 💖</button>
+        <button id="noBtn" class="btn no" aria-label="No">Umm… no</button>
+      </div>
+
+      <p class="hint">(Psst… the pink one is the correct answer.)</p>
+
+      <div id="success" class="success hidden" aria-live="polite">
+        <h2>Yaaay! 🥳</h2>
+        <p>Can’t wait! I saved you a seat already.</p>
+        <p class="countdown">Taking you to booking in <span id="count">5</span>s…</p>
+        <div class="hearts" id="hearts"></div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ===== Configurable bits =====
+    const REDIRECT_TO = '/#booking';          // Where to go after YES
+    const COUNTDOWN_SECONDS = 5;              // Countdown length
+
+    // ===== Elements =====
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn  = document.getElementById('noBtn');
+    const btnRow = document.getElementById('btnRow');
+    const success = document.getElementById('success');
+    const countEl = document.getElementById('count');
+    const heartsLayer = document.getElementById('hearts');
+
+    // Make the "No" button dodge the cursor (and finger)
+    function moveNo(){
+      // Ensure absolute positioning within the row
+      btnRow.style.position = 'relative';
+      noBtn.style.position = 'absolute';
+
+      const rowRect = btnRow.getBoundingClientRect();
+      const btnW = noBtn.offsetWidth;
+      const btnH = noBtn.offsetHeight;
+      const pad = 6;
+      const maxX = Math.max(0, rowRect.width - btnW - pad);
+      const maxY = Math.max(0, Math.max(40, rowRect.height) - btnH - pad);
+
+      const x = Math.random() * maxX;
+      const y = Math.random() * maxY;
+
+      noBtn.style.transform = `translate(${x}px, ${y}px) rotate(${(Math.random()*8-4).toFixed(1)}deg)`;
+    }
+
+    noBtn.addEventListener('mouseenter', moveNo);
+    noBtn.addEventListener('touchstart', (e)=>{ e.preventDefault(); moveNo(); }, {passive:false});
+
+    // YES flow: show success, hearts, countdown, then redirect
+    yesBtn.addEventListener('click', ()=>{
+      // Hide buttons + hint
+      yesBtn.style.display = 'none';
+      noBtn.style.display = 'none';
+      document.querySelector('.hint').style.display = 'none';
+
+      // Reveal success block
+      success.classList.remove('hidden');
+      startHearts();
+      startCountdown(COUNTDOWN_SECONDS, () => {
+        window.location.href = REDIRECT_TO;
+      });
+    });
+
+    function startCountdown(seconds, done){
+      let n = seconds;
+      countEl.textContent = n;
+      const t = setInterval(()=>{
+        n--; countEl.textContent = n;
+        if(n <= 0){ clearInterval(t); done && done(); }
+      }, 1000);
+    }
+
+    // create floating hearts for a few seconds
+    function startHearts(){
+      const duration = 2000; // spawn hearts for 2s
+      const endAt = performance.now() + duration;
+      const spawn = ()=>{
+        if (performance.now() < endAt){
+          makeHeart();
+          requestAnimationFrame(spawn);
+        }
+      };
+      requestAnimationFrame(spawn);
+    }
+
+    function makeHeart(){
+      const h = document.createElement('span');
+      h.className = 'heart';
+      const box = heartsLayer.getBoundingClientRect();
+      const left = Math.random() * box.width;
+      const size = 12 + Math.random()*14; // 12-26px
+      h.style.left = left + 'px';
+      h.style.bottom = '-10px';
+      h.style.width = size + 'px';
+      h.style.height = size + 'px';
+      h.style.animation = `rise ${1.6 + Math.random()*1.1}s ease-out forwards`;
+      h.style.opacity = 0.7 + Math.random()*0.2;
+      heartsLayer.appendChild(h);
+      setTimeout(()=> h.remove(), 2200);
+    }
+  </script>
+</body>
+</html>

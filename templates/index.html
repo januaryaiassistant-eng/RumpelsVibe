@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RumpelsVibe Co.</title>
+  <meta name="description" content="RumpelsVibe Co. — Websites that feel alive. Portfolio, interactive demos, and virtual booking." />
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <!-- Header / Nav -->
+  <header class="site-header">
+    <nav class="nav" aria-label="Main navigation">
+      <a class="brand" href="{{ url_for('home') }}">
+        <span class="logo" aria-hidden="true"></span>
+        <span class="brand-text">RumpelsVibe Co.</span>
+      </a>
+      <button class="menu-btn" id="menu-toggle" aria-controls="sidebar" aria-expanded="false" aria-label="Open menu">
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Slide-out Menu -->
+  <aside class="sidebar" id="sidebar" aria-hidden="true">
+    <div class="sidebar-head">
+      <span class="logo small"></span>
+      <span class="brand-text small">RumpelsVibe Co.</span>
+      <button class="close-btn" id="menu-close" aria-label="Close menu">✕</button>
+    </div>
+    <nav class="side-links">
+      <a href="#about">About</a>
+      <a href="#showcase">Portfolio</a>
+      <a href="{{ url_for('promposal') }}">Promposal Page</a>
+      <a href="{{ url_for('dateinvite') }}">Date Invite Page</a>
+      <a href="{{ url_for('fake1') }}">Fake Site: Business</a>
+      <a href="{{ url_for('contact') }}">Contact</a>
+      <a href="{{ url_for('booking') }}" id="booking-link">Book Appointment</a>
+      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      <a href="{{ url_for('terms') }}">Terms of Service</a>
+    </nav>
+  </aside>
+  <div class="backdrop" id="backdrop" aria-hidden="true"></div>
+
+  <!-- Hero / About -->
+  <main>
+    <section class="hero" id="about" role="region" aria-label="About RumpelsVibe Co.">
+      <p class="tagline">Design that sets the vibe.</p>
+      <h1>Websites that <span class="shimmer-text">feel alive</span>.</h1>
+      <p class="lead">
+        We craft interactive, colorful experiences for brands, creators, and small businesses.
+        Explore our showcase, try a couple of fun mini-sites, and book a virtual session to bring your idea to life.
+      </p>
+      <div class="cta-row">
+        <a class="btn primary" href="#showcase">View Portfolio</a>
+        <a class="btn ghost" href="{{ url_for('promposal') }}">Try Promposal</a>
+        <a class="btn ghost" href="{{ url_for('dateinvite') }}">Try Date Invite</a>
+        <a class="btn primary" href="{{ url_for('booking') }}">Book Appointment</a>
+      </div>
+    </section>
+
+    <!-- Showcase Grid -->
+    <section class="section" id="showcase" aria-label="Showcase">
+      <h2>Showcase</h2>
+      <div class="grid">
+        <!-- Card 1 -->
+        <a class="card" href="{{ url_for('fake1') }}" data-video="{{ url_for('static', filename='videos/business-preview.mp4') }}">
+          <div class="thumb">
+            <img src="{{ url_for('static', filename='images/business-thumb.PNG') }}" alt="Business Site Thumbnail">
+          </div>
+          <span class="badge">Template</span>
+          <h3>Business Site — Clean & Bold</h3>
+          <p>Corporate vibe with strong CTAs and services layout.</p>
+        </a>
+
+        <!-- Card 2 -->
+        <a class="card" href="{{ url_for('promposal') }}" data-video="{{ url_for('static', filename='videos/promposal-preview.mp4') }}">
+          <div class="thumb">
+            <img src="{{ url_for('static', filename='images/promposal-thumb.PNG') }}" alt="Promposal Thumbnail">
+          </div>
+          <span class="badge">Cute</span>
+          <h3>Promposal Page</h3>
+          <p>Ask someone to prom with animated flair.</p>
+        </a>
+
+        <!-- Card 3 -->
+        <a class="card" href="{{ url_for('dateinvite') }}" data-video="{{ url_for('static', filename='videos/dateinvite-preview.mp4') }}">
+          <div class="thumb">
+            <img src="{{ url_for('static', filename='images/dateinvite-thumb.PNG') }}" alt="Date Invite Thumbnail">
+          </div>
+          <span class="badge">Romance</span>
+          <h3>Date Invite Page</h3>
+          <p>Playful yes/no interaction with a surprise.</p>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer" id="contact">
+    <div class="footer-wrap">
+      <div class="footer-brand">
+        <span class="logo tiny"></span>
+        <strong>RumpelsVibe Co.</strong>
+        <span class="muted">Websites that feel alive.</span>
+      </div>
+
+      <div class="footer-links">
+        <a href="{{ url_for('privacy') }}">Privacy</a>
+        <a href="{{ url_for('terms') }}">Terms</a>
+        <a href="{{ url_for('contact') }}">Contact</a>
+        <a href="{{ url_for('booking') }}">Book</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> RumpelsVibe Co. — All Rights Reserved.</span>
+    </div>
+  </footer>
+
+  <!-- JS -->
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+  <!-- Hover Video Loader -->
+  <script>
+    document.querySelectorAll('.card').forEach(card => {
+      const videoSrc = card.dataset.video;
+      let videoEl;
+
+      card.addEventListener('mouseenter', () => {
+        if (!videoEl) {
+          videoEl = document.createElement('video');
+          videoEl.src = videoSrc;
+          videoEl.autoplay = true;
+          videoEl.muted = true;
+          videoEl.loop = true;
+          videoEl.playsInline = true;
+          videoEl.classList.add('card-video');
+          card.querySelector('.thumb').appendChild(videoEl);
+        }
+        videoEl.style.opacity = '1';
+      });
+
+      card.addEventListener('mouseleave', () => {
+        if (videoEl) {
+          videoEl.style.opacity = '0';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

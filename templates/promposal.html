@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promposal 💖</title>
+    
+    <!-- Link to CSS in static folder -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/promposal.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Will you go to prom with me? 💃✨</h1>
+        <div class="buttons">
+            <button id="yesBtn">YES 💕</button>
+            <button id="noBtn">NO 🙈</button>
+        </div>
+        <p class="message"></p>
+    </div>
+
+    <!-- Link to JS in static folder -->
+    <script src="{{ url_for('static', filename='js/promposal.js') }}"></script>
+</body>
+</html>

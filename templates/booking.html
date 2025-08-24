@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Book an Appointment • RumpelsVibe Co.</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+
+  <style>
+    /* ---- Global gradient + subtle animations ---- */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1e293b, #2a2f4f, #3b3c57);
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      animation: fadeIn 0.8s ease-in-out;
+    }
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+
+    h1, h2, h3 { font-weight: 600; }
+    a { color: var(--accent, #00f5d4); text-decoration: none; }
+
+    /* ---- Booking layout ---- */
+    .booking-wrap {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 22px;
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 18px;
+    }
+    @media (max-width: 900px) { .booking-wrap { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      backdrop-filter: blur(6px);
+    }
+
+    /* ---- Calendar ---- */
+    .cal-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+    }
+    .cal-header h2 { font-size: 1.15rem; margin: 0; }
+    .cal-nav button {
+      border: none; background: rgba(255,255,255,0.08);
+      color: #fff; padding: 8px 10px; border-radius: 10px; cursor: pointer;
+      transition: background .2s ease;
+    }
+    .cal-nav button:hover { background: rgba(255,255,255,0.18); }
+
+    .calendar {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;
+    }
+    .dow {
+      text-align: center; color: var(--muted,#bbb); font-size: .85rem;
+    }
+    .day {
+      aspect-ratio: 1 / 1;
+      border-radius: 12px;
+      display: grid; place-items: center;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.03);
+      cursor: pointer;
+      transition: transform .15s ease, border-color .15s ease, background .15s ease;
+      position: relative;
+      font-weight: 500;
+    }
+    .day:hover { transform: translateY(-2px); border-color: rgba(255,255,255,0.24); }
+    .day.muted { color: var(--muted); opacity: .6; cursor: default; }
+    .day.past { opacity: .35; pointer-events: none; }
+    .day.selected { outline: 2px solid var(--accent,#00f5d4); }
+    .day.fully-booked {
+      background: rgba(255,0,80,0.15);
+      border-color: rgba(255,0,80,0.35);
+      cursor: not-allowed;
+    }
+    .day .dot {
+      position: absolute; bottom: 6px;
+      width: 6px; height: 6px; border-radius: 999px;
+      background: var(--accent-2,#ff7eb3);
+    }
+
+    /* ---- Form ---- */
+    .form-grid { display: grid; gap: 10px; }
+    .row { display: flex; gap: 10px; }
+    .row > * { flex: 1; min-width: 0; }
+
+    input[type="email"], select, textarea {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.18);
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.06);
+      color: var(--text,#fff);
+      font: inherit;
+      transition: border-color .2s ease, background .2s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent,#00f5d4);
+      background: rgba(255,255,255,0.12);
+      outline: none;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+
+    select option[disabled] {
+      color: #aaa;
+    }
+
+    .helper { color: var(--muted,#aaa); font-size: .9rem; }
+    .success, .error {
+      margin-top: 10px; padding: 12px 14px; border-radius: 12px; font-weight: 600;
+    }
+    .success { background: rgba(0,245,212,0.15); border: 1px solid rgba(0,245,212,0.35); }
+    .error { background: rgba(255,0,80,0.15); border: 1px solid rgba(255,0,80,0.35); }
+
+    button.btn.primary {
+      background: var(--accent,#00f5d4);
+      color: #000;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s ease;
+    }
+    button.btn.primary:hover {
+      background: #0ff0c4;
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav" aria-label="Main navigation">
+      <a class="brand" href="{{ url_for('home') }}">
+        <span class="brand-text">RumpelsVibe Co.</span>
+      </a>
+      <button class="menu-btn" id="menu-toggle" aria-controls="sidebar" aria-expanded="false" aria-label="Open menu">
+        <span class="bar"></span><span class="bar"></span><span class="bar"></span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- Sidebar Menu -->
+  <aside class="sidebar" id="sidebar" aria-hidden="true">
+    <div class="sidebar-head">
+      <span class="brand-text small">RumpelsVibe Co.</span>
+      <button class="close-btn" id="menu-close" aria-label="Close menu">✕</button>
+    </div>
+    <nav class="side-links">
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('promposal') }}">Promposal</a>
+      <a href="{{ url_for('dateinvite') }}">Date Invite</a>
+      <a href="{{ url_for('fake1') }}">Fake Site</a>
+      <a href="{{ url_for('contact') }}">Contact</a>
+      <a href="{{ url_for('booking') }}" class="active">Book Appointment</a>
+      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
+      <a href="{{ url_for('terms') }}">Terms of Service</a>
+    </nav>
+  </aside>
+  <div class="backdrop" id="backdrop" aria-hidden="true"></div>
+
+  <main class="section" aria-label="Booking">
+    <h1>Book a Virtual Appointment</h1>
+    <p class="muted">Pick a date, choose a time, and leave your details. We’ll confirm by email.</p>
+
+    <div class="booking-wrap">
+      <!-- Calendar -->
+      <section class="panel">
+        <div class="cal-header">
+          <button class="cal-prev" aria-label="Previous month">‹</button>
+          <h2 id="calTitle">Loading…</h2>
+          <button class="cal-next" aria-label="Next month">›</button>
+        </div>
+        <div class="calendar" id="calendarGrid" aria-label="Calendar"></div>
+        <p class="helper">• Pink = fully booked. • Dots = partially booked. • Past days disabled.</p>
+      </section>
+
+      <!-- Form -->
+      <section class="panel">
+        <form id="bookingForm" class="form-grid" novalidate>
+          <div class="row">
+            <div>
+              <label for="selectedDate">Date</label>
+              <input id="selectedDate" name="date" type="text" placeholder="Select from calendar" readonly required />
+            </div>
+            <div>
+              <label for="timeSelect">Time</label>
+              <select id="timeSelect" name="time" required>
+                <option value="">Select a time</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="you@example.com" required />
+          </div>
+
+          <div>
+            <label for="message">What are you looking for?</label>
+            <textarea id="message" name="message" placeholder="Goals, vibe, references, budget… anything helpful."></textarea>
+          </div>
+
+          <!-- Optional ethical question -->
+          <div>
+            <label for="ethics">Quick question: Do you believe design should always prioritize user accessibility?</label>
+            <select id="ethics" name="ethics" required>
+              <option value="">Choose an answer</option>
+              <option value="yes">Yes, accessibility is essential</option>
+              <option value="sometimes">Sometimes, depends on the project</option>
+              <option value="no">No, aesthetics over everything</option>
+            </select>
+          </div>
+
+          <label style="display:flex; gap:8px; align-items:center;">
+            <input type="checkbox" id="agree" required />
+            <span class="helper">I agree to respectful, professional conduct during the meeting.</span>
+          </label>
+
+          <button class="btn primary" type="submit">Request Booking</button>
+          <div id="formNote" role="status" aria-live="polite"></div>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> RumpelsVibe Co. — All Rights Reserved.</span>
+    </div>
+  </footer>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  <script>
+    const calGrid = document.getElementById('calendarGrid');
+    const calTitle = document.getElementById('calTitle');
+    const prevBtn = document.querySelector('.cal-prev');
+    const nextBtn = document.querySelector('.cal-next');
+    const selectedDateInput = document.getElementById('selectedDate');
+    const timeSelect = document.getElementById('timeSelect');
+    const form = document.getElementById('bookingForm');
+    const formNote = document.getElementById('formNote');
+
+    let YEAR, MONTH;
+    let TODAY_ISO = null;
+    let BOOKED = [];
+    let TIME_SLOTS = [];
+    let selectedISO = "";
+
+    function pad(n){ return n.toString().padStart(2,'0'); }
+    function iso(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+
+    async function loadAvailability(){
+      const res = await fetch("{{ url_for('api_availability') }}");
+      const data = await res.json();
+      BOOKED = data.booked || [];
+      TIME_SLOTS = data.timeSlots || [];
+      TODAY_ISO = data.today;
+      const today = new Date(TODAY_ISO);
+      YEAR = today.getFullYear();
+      MONTH = today.getMonth();
+      renderTimeSlots(TIME_SLOTS);
+      renderCalendar(YEAR, MONTH);
+    }
+
+    function renderTimeSlots(slots){
+      timeSelect.innerHTML = `<option value="">Select a time</option>`;
+      slots.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s; opt.textContent = s;
+        timeSelect.appendChild(opt);
+      });
+    }
+
+    function getBookingsByDate(isoStr){
+      return BOOKED.filter(b => b.date === isoStr).map(b => b.time);
+    }
+
+    function renderCalendar(year, month){
+      const monthName = new Date(year, month, 1).toLocaleString([], { month: 'long', year: 'numeric' });
+      calTitle.textContent = monthName;
+      calGrid.innerHTML = "";
+
+      const dowLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      dowLabels.forEach(d => {
+        const el = document.createElement('div');
+        el.className = 'dow';
+        el.textContent = d;
+        calGrid.appendChild(el);
+      });
+
+      const first = new Date(year, month, 1);
+      const startDow = first.getDay();
+      const daysInMonth = new Date(year, month+1, 0).getDate();
+      const todayISO = TODAY_ISO;
+
+      for (let i=0; i<startDow; i++){
+        const blank = document.createElement('div');
+        calGrid.appendChild(blank);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++){
+        const d = new Date(year, month, day);
+        const dISO = iso(d);
+        const cell = document.createElement('button');
+        cell.type = 'button';
+        cell.className = 'day';
+        cell.textContent = day;
+
+        if (dISO < todayISO){ cell.classList.add('past'); cell.disabled = true; }
+
+        const bookedTimes = getBookingsByDate(dISO);
+        if (bookedTimes.length > 0){
+          const dot = document.createElement('div'); dot.className = 'dot'; cell.appendChild(dot);
+        }
+        if (bookedTimes.length >= TIME_SLOTS.length){
+          cell.classList.add('fully-booked'); cell.disabled = true;
+        }
+
+        if (selectedISO === dISO) cell.classList.add('selected');
+
+        cell.addEventListener('click', () => {
+          selectedISO = dISO;
+          selectedDateInput.value = dISO;
+          document.querySelectorAll('.day.selected').forEach(el => el.classList.remove('selected'));
+          cell.classList.add('selected');
+          renderTimeSlots(TIME_SLOTS);
+          bookedTimes.forEach(bt => {
+            const opt = [...timeSelect.options].find(o => o.value === bt);
+            if (opt) opt.disabled = true;
+          });
+        });
+
+        calGrid.appendChild(cell);
+      }
+    }
+
+    prevBtn.addEventListener('click', () => {
+      const current = new Date(YEAR, MONTH, 1);
+      current.setMonth(current.getMonth() - 1);
+      YEAR = current.getFullYear();
+      MONTH = current.getMonth();
+      renderCalendar(YEAR, MONTH);
+    });
+    nextBtn.addEventListener('click', () => {
+      const current = new Date(YEAR, MONTH, 1);
+      current.setMonth(current.getMonth() + 1);
+      YEAR = current.getFullYear();
+      MONTH = current.getMonth();
+      renderCalendar(YEAR, MONTH);
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      formNote.className = ""; formNote.textContent = "";
+
+      const payload = {
+        date: selectedDateInput.value.trim(),
+        time: timeSelect.value.trim(),
+        email: document.getElementById('email').value.trim(),
+        message: document.getElementById('message').value.trim(),
+        ethics: document.getElementById('ethics').value.trim(),
+        agree: document.getElementById('agree').checked
+      };
+
+      try {
+        const res = await fetch("{{ url_for('api_book') }}", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.description || "Booking failed.");
+
+        formNote.className = "success";
+        formNote.textContent = "🎉 Booked! Check your email for a confirmation soon.";
+        await loadAvailability();
+        if (selectedISO) {
+          selectedDateInput.value = selectedISO;
+          const cell = [...document.querySelectorAll('.day')].find(el => el.textContent === String(+selectedISO.split('-')[2]));
+          if (cell) cell.classList.add('selected');
+        }
+        form.reset();
+      } catch (err) {
+        formNote.className = "error"; formNote.textContent = err.message;
+      }
+    });
+
+    loadAvailability();
+  </script>
+</body>
+</html>
